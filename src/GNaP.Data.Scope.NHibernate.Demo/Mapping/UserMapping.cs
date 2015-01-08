@@ -1,8 +1,11 @@
 namespace GNaP.Data.Scope.NHibernate.Demo.Mapping
 {
-    using DomainModel;
     using FluentNHibernate.Mapping;
+    using DomainModel;
 
+    /// <summary>
+    /// Defines the convention-based mapping overrides for the User model.
+    /// </summary>
     public class UserMapping : ClassMap<User>
     {
         public UserMapping()

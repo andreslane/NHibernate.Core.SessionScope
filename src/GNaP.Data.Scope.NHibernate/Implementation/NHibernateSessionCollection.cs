@@ -5,115 +5,78 @@
     using System.Data;
     using System.Runtime.ExceptionServices;
     using global::NHibernate;
+    using Interfaces;
 
-    public class NHibernateContextCollection
+    internal class NHibernateSessionCollection
     {
-        private readonly bool readOnly;
-        private readonly IsolationLevel? isolationLevel;
-        private readonly IDictionary<string, ISession> initializedSessions;
-        private Dictionary<ISession, ITransaction> transactions;
-        private bool disposed;
-        private bool completed;
+        private readonly IDictionary<string, ISession> _initializedSessions;
+        private readonly Dictionary<ISession, ITransaction> _transactions;
+        private readonly IsolationLevel? _isolationLevel;
+        private bool _disposed;
+        private bool _completed;
+        private readonly bool _readOnly;
 
-        internal IDictionary<string, ISession> InitializedDbContexts { get { return initializedSessions; } }
+        internal IDictionary<string, ISession> InitializedDbContexts { get { return _initializedSessions; } }
 
-        public NHibernateContextCollection(bool readOnly = false, IsolationLevel? isolationLevel = null)
+        public NHibernateSessionCollection(bool readOnly = false, IsolationLevel? isolationLevel = null)
         {
-            this.readOnly = readOnly;
-            this.isolationLevel = isolationLevel;
+            _disposed = false;
+            _completed = false;
 
-            initializedSessions = new Dictionary<string, ISession>();
-            transactions = new Dictionary<ISession, ITransaction>();
-            disposed = false;
-            completed = false;
+            _initializedSessions = new Dictionary<string, ISession>();
+            _transactions = new Dictionary<ISession, ITransaction>();
+
+            _readOnly = readOnly;
+            _isolationLevel = isolationLevel;
         }
 
-        public TDbContext Get<TDbContext, TFactory>() where TDbContext : ISession
+        public TDbContext Get<TDbContext, TFactory>()
+            where TDbContext : ISession
+            where TFactory : IDbFactory<ISessionFactory>
         {
-            if (disposed)
-                throw new ObjectDisposedException("DbContextCollection");
+            if (_disposed)
+                throw new ObjectDisposedException("NHibernateSessionCollection");
 
             var sessionKey = typeof(TFactory).Name;
 
-            if (!initializedSessions.ContainsKey(sessionKey))
+            if (_initializedSessions.ContainsKey(sessionKey))
+                return (TDbContext) _initializedSessions[sessionKey];
+
+            // First time we've been asked for this particular DbContext type.
+            // Create one, cache it and start its database transaction if needed.
+            var contextFactory = Activator.CreateInstance<TFactory>();
+            var sessionFactory = contextFactory.Create();
+            var session = sessionFactory.OpenSession();
+            global::NHibernate.Context.CurrentSessionContext.Bind(session);
+
+            _initializedSessions.Add(sessionKey, session);
+
+            if (_readOnly)
             {
-                // First time we've been asked for this particular DbContext type.
-                // Create one, cache it and start its database transaction if needed.
-                var contextFactory = (IContextFactory<ISessionFactory>)Activator.CreateInstance<TFactory>();
-                ISessionFactory sessionFactory = contextFactory.Create();
-                ISession session = sessionFactory.OpenSession();
-                global::NHibernate.Context.CurrentSessionContext.Bind(session);
-
-                initializedSessions.Add(sessionKey, session);
-
-                if (readOnly)
-                {
-                    session.FlushMode = FlushMode.Never;
-                }
-
-                if (isolationLevel.HasValue)
-                {
-                    var transaction = session.BeginTransaction(isolationLevel.Value);
-                    transactions.Add(session, transaction);
-                }
+                session.FlushMode = FlushMode.Never;
             }
 
-            return (TDbContext)initializedSessions[sessionKey];
+            if (_isolationLevel.HasValue)
+            {
+                var transaction = session.BeginTransaction(_isolationLevel.Value);
+                _transactions.Add(session, transaction);
+            }
+
+            return (TDbContext)_initializedSessions[sessionKey];
         }
 
         public ISession GetFromFactory<TDbContextFactory>()
+            where TDbContextFactory : IDbFactory<ISessionFactory>
         {
             return Get<ISession, TDbContextFactory>();
         }
 
-        public TDbContext Get<TDbContext>() where TDbContext : ISession
-        {
-            throw new NotSupportedException("Please use the Get<TDbContext, TDbContextFactory> method instead");
-        }
-
-        public void Dispose()
-        {
-            if (disposed)
-                return;
-
-            // Do our best here to dispose as much as we can even if we get errors along the way.
-            // Now is not the time to throw. Correctly implemented applications will have called
-            // either Commit() or Rollback() first and would have got the error there.
-
-            if (!completed)
-            {
-                try
-                {
-                    if (readOnly) Commit();
-                    else Rollback();
-                }
-                catch (Exception e)
-                {
-                    System.Diagnostics.Debug.WriteLine(e);
-                }
-            }
-
-            foreach (var dbContext in initializedSessions.Values)
-            {
-                try
-                {
-                    dbContext.Dispose();
-                }
-                catch (Exception e)
-                {
-                    System.Diagnostics.Debug.WriteLine(e);
-                }
-            }
-
-            initializedSessions.Clear();
-            disposed = true;
-        }
-
         public int Commit()
         {
-            if (disposed)
+            if (_disposed)
                 throw new ObjectDisposedException("DbContextCollection");
-            if (completed)
+
+            if (_completed)
                 throw new InvalidOperationException("You can't call Commit() or Rollback() more than once on a DbContextCollection. All the changes in the DbContext instances managed by this collection have already been saved or rollback and all database transactions have been completed and closed. If you wish to make more data changes, create a new DbContextCollection and make your changes there.");
 
             // Best effort. You'll note that we're not actually implementing an atomic commit
@@ -136,22 +99,22 @@
 
             var c = 0; // ??? is there a way to check the number of changes in NHibernate ???
 
-            foreach (var session in initializedSessions.Values)
+            foreach (var session in _initializedSessions.Values)
             {
                 try
                 {
-                    if (!readOnly)
+                    if (!_readOnly)
                     {
                         session.Flush();
                     }
 
                     // If we've started an explicit database transaction, time to commit it now.
-                    var transaction = GetValueOrDefault(transactions, session);
-                    if (transaction != null)
-                    {
-                        transaction.Commit();
-                        transaction.Dispose();
-                    }
+                    var transaction = GetValueOrDefault(_transactions, session);
+                    if (transaction == null)
+                        continue;
+
+                    transaction.Commit();
+                    transaction.Dispose();
                 }
                 catch (Exception e)
                 {
@@ -159,8 +122,8 @@
                 }
             }
 
-            transactions.Clear();
-            completed = true;
+            _transactions.Clear();
+            _completed = true;
 
             if (lastError != null)
                 lastError.Throw(); // Re-throw while maintaining the exception's original stack track
@@ -170,14 +133,15 @@
 
         public void Rollback()
         {
-            if (disposed)
+            if (_disposed)
                 throw new ObjectDisposedException("DbContextCollection");
-            if (completed)
+
+            if (_completed)
                 throw new InvalidOperationException("You can't call Commit() or Rollback() more than once on a DbContextCollection. All the changes in the DbContext instances managed by this collection have already been saved or rollback and all database transactions have been completed and closed. If you wish to make more data changes, create a new DbContextCollection and make your changes there.");
 
             ExceptionDispatchInfo lastError = null;
 
-            foreach (var dbContext in initializedSessions.Values)
+            foreach (var dbContext in _initializedSessions.Values)
             {
                 // There's no need to explicitly rollback changes in a DbContext as
                 // DbContext doesn't save any changes until its SaveChanges() method is called.
@@ -185,7 +149,7 @@
                 // method.
 
                 // But if we've started an explicit database transaction, then we must roll it back.
-                var tran = GetValueOrDefault(transactions, dbContext);
+                var tran = GetValueOrDefault(_transactions, dbContext);
                 if (tran != null)
                 {
                     try
@@ -200,13 +164,50 @@
                 }
             }
 
-            transactions.Clear();
-            completed = true;
+            _transactions.Clear();
+            _completed = true;
 
             if (lastError != null)
                 lastError.Throw(); // Re-throw while maintaining the exception's original stack track
         }
 
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            // Do our best here to dispose as much as we can even if we get errors along the way.
+            // Now is not the time to throw. Correctly implemented applications will have called
+            // either Commit() or Rollback() first and would have got the error there.
+
+            if (!_completed)
+            {
+                try
+                {
+                    if (_readOnly) Commit();
+                    else Rollback();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                }
+            }
+
+            foreach (var dbContext in _initializedSessions.Values)
+            {
+                try
+                {
+                    dbContext.Dispose();
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                }
+            }
+
+            _initializedSessions.Clear();
+            _disposed = true;
+        }
 
         private static TValue GetValueOrDefault<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey key)
         {

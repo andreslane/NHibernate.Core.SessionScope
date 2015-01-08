@@ -11,16 +11,16 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
     using global::NHibernate;
 
     /// <summary>
-    /// Convenience methods to retrieve ambient DbContext instances.
+    /// Convenience methods to retrieve ambient ISession instances.
     /// </summary>
-    public interface IAmbientDbContextLocator
+    public interface IAmbientDbLocator
     {
         /// <summary>
-        /// If called within the scope of a DbContextScope, gets or creates
-        /// the ambient DbContext instance for the provided DbContext type.
+        /// If called within the scope of a NHibernateScope, gets or creates
+        /// the ambient ISession instance for the provided SessionFactory type.
         ///
         /// Otherwise returns null.
         /// </summary>
-        TDbContext Get<TDbContext>() where TDbContext : ISession;
+        ISession Get<TDbFactory>() where TDbFactory : IDbFactory<ISessionFactory>;
     }
 }

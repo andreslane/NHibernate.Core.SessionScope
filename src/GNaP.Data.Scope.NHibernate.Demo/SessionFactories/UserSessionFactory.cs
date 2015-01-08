@@ -5,28 +5,25 @@ namespace GNaP.Data.Scope.NHibernate.Demo.SessionFactories
     using global::NHibernate;
     using global::NHibernate.Context;
     using global::NHibernate.Tool.hbm2ddl;
+    using Interfaces;
 
-    public class UserSessionFactory : IContextFactory<ISessionFactory>
+    public class UserSessionFactory : IDbFactory<ISessionFactory>
     {
-        private const string DbFile = "DemoNHibernate.mdf";
-        private static ISessionFactory sessionFactory;
+        private static ISessionFactory _sessionFactory;
 
         public ISessionFactory Create()
         {
-            return sessionFactory ?? (sessionFactory = CreateSessionFactory());
+            return _sessionFactory ?? (_sessionFactory = CreateSessionFactory());
         }
 
         private static ISessionFactory CreateSessionFactory()
         {
             return Fluently.Configure()
-                .Database(MsSqlConfiguration.MsSql2008
-                    .ConnectionString(
-                        @"Data Source=(LocalDB)\v11.0;AttachDbFilename=|DataDirectory|\nh.mdf;Integrated Security=True")
-                )
-                .Mappings(m => m.FluentMappings.AddFromAssemblyOf<Program>())
-                .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true))
-                .CurrentSessionContext<CallSessionContext>()
-                .BuildSessionFactory();
+                           .Database(MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=|DataDirectory|\nh.mdf;Integrated Security=True"))
+                           .Mappings(m => m.FluentMappings.AddFromAssemblyOf<Program>())
+                           .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true)) // TODO: Doesnt this always recreate the database?
+                           .CurrentSessionContext<CallSessionContext>()
+                           .BuildSessionFactory();
         }
     }
 }

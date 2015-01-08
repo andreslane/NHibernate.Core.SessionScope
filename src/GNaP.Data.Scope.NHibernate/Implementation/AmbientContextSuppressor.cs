@@ -10,14 +10,14 @@ namespace GNaP.Data.Scope.NHibernate.Implementation
 {
     using System;
 
-    public class AmbientContextSuppressor : IDisposable
+    internal class AmbientContextSuppressor : IDisposable
     {
-        private NHibernateContextScope _savedScope;
+        private NHibernateScope _savedScope;
         private bool _disposed;
 
         public AmbientContextSuppressor()
         {
-            _savedScope = NHibernateContextScope.GetAmbientScope();
+            _savedScope = NHibernateScope.GetAmbientScope();
 
             // We're hiding the ambient scope but not removing its instance
             // altogether. This is to be tolerant to some programming errors.
@@ -39,7 +39,7 @@ namespace GNaP.Data.Scope.NHibernate.Implementation
             // that happen. Hiding the ambient scope (i.e. clearing the CallContext
             // in our execution flow but leaving the ambient scope instance untouched)
             // is safe.
-            NHibernateContextScope.HideAmbientScope();
+            NHibernateScope.HideAmbientScope();
         }
 
         public void Dispose()
@@ -49,7 +49,7 @@ namespace GNaP.Data.Scope.NHibernate.Implementation
 
             if (_savedScope != null)
             {
-                NHibernateContextScope.SetAmbientScope(_savedScope);
+                NHibernateScope.SetAmbientScope(_savedScope);
                 _savedScope = null;
             }
 

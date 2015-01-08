@@ -12,42 +12,42 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
     using System.Data;
 
     /// <summary>
-    /// Convenience methods to create a new ambient DbContextScope. This is the prefered method
-    /// to create a DbContextScope.
+    /// Convenience methods to create a new ambient NHibernateScope. This is the prefered method
+    /// to create a NHibernateScope.
     /// </summary>
-    public interface IDbContextScopeFactory
+    public interface IDbScopeFactory
     {
         /// <summary>
-        /// Creates a new DbContextScope.
+        /// Creates a new NHibernateScope.
         ///
         /// By default, the new scope will join the existing ambient scope. This
-        /// is what you want in most cases. This ensures that the same DbContext instances
+        /// is what you want in most cases. This ensures that the same ISession instances
         /// are used by all services methods called within the scope of a business transaction.
         ///
         /// Set 'joiningOption' to 'ForceCreateNew' if you want to ignore the ambient scope
-        /// and force the creation of new DbContext instances within that scope. Using 'ForceCreateNew'
+        /// and force the creation of new ISession instances within that scope. Using 'ForceCreateNew'
         /// is an advanced feature that should be used with great care and only if you fully understand the
         /// implications of doing this.
         /// </summary>
-        IDbContextScope Create(DbContextScopeOption joiningOption = DbContextScopeOption.JoinExisting);
+        IDbScope Create(DbScopeOption joiningOption = DbScopeOption.JoinExisting);
 
         /// <summary>
-        /// Creates a new DbContextScope for read-only queries.
+        /// Creates a new NHibernateScope for read-only queries.
         ///
         /// By default, the new scope will join the existing ambient scope. This
-        /// is what you want in most cases. This ensures that the same DbContext instances
+        /// is what you want in most cases. This ensures that the same ISession instances
         /// are used by all services methods called within the scope of a business transaction.
         ///
         /// Set 'joiningOption' to 'ForceCreateNew' if you want to ignore the ambient scope
-        /// and force the creation of new DbContext instances within that scope. Using 'ForceCreateNew'
+        /// and force the creation of new ISession instances within that scope. Using 'ForceCreateNew'
         /// is an advanced feature that should be used with great care and only if you fully understand the
         /// implications of doing this.
         /// </summary>
-        IDbContextReadOnlyScope CreateReadOnly(DbContextScopeOption joiningOption = DbContextScopeOption.JoinExisting);
+        IDbReadOnlyScope CreateReadOnly(DbScopeOption joiningOption = DbScopeOption.JoinExisting);
 
         /// <summary>
-        /// Forces the creation of a new ambient DbContextScope (i.e. does not
-        /// join the ambient scope if there is one) and wraps all DbContext instances
+        /// Forces the creation of a new ambient NHibernateScope (i.e. does not
+        /// join the ambient scope if there is one) and wraps all ISession instances
         /// created within that scope in an explicit database transaction with
         /// the provided isolation level.
         ///
@@ -59,11 +59,11 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
         /// This is an advanced feature that you should use very carefully
         /// and only if you fully understand the implications of doing this.
         /// </summary>
-        IDbContextScope CreateWithTransaction(IsolationLevel isolationLevel);
+        IDbScope CreateWithTransaction(IsolationLevel isolationLevel);
 
         /// <summary>
-        /// Forces the creation of a new ambient read-only DbContextScope (i.e. does not
-        /// join the ambient scope if there is one) and wraps all DbContext instances
+        /// Forces the creation of a new ambient read-only NHibernateScope (i.e. does not
+        /// join the ambient scope if there is one) and wraps all ISession instances
         /// created within that scope in an explicit database transaction with
         /// the provided isolation level.
         ///
@@ -75,18 +75,18 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
         /// This is an advanced feature that you should use very carefully
         /// and only if you fully understand the implications of doing this.
         /// </summary>
-        IDbContextReadOnlyScope CreateReadOnlyWithTransaction(IsolationLevel isolationLevel);
+        IDbReadOnlyScope CreateReadOnlyWithTransaction(IsolationLevel isolationLevel);
 
         /// <summary>
-        /// Temporarily suppresses the ambient DbContextScope.
+        /// Temporarily suppresses the ambient NHibernateScope.
         ///
-        /// Always use this if you need to  kick off parallel tasks within a DbContextScope.
+        /// Always use this if you need to  kick off parallel tasks within a NHibernateScope.
         /// This will prevent the parallel tasks from using the current ambient scope. If you
-        /// were to kick off parallel tasks within a DbContextScope without suppressing the ambient
-        /// context first, all the parallel tasks would end up using the same ambient DbContextScope, which
-        /// would result in multiple threads accesssing the same DbContext instances at the same
+        /// were to kick off parallel tasks within a NHibernateScope without suppressing the ambient
+        /// context first, all the parallel tasks would end up using the same ambient NHibernateScope, which
+        /// would result in multiple threads accesssing the same ISession instances at the same
         /// time.
         /// </summary>
-        IDisposable SuppressAmbientContext();
+        IDisposable SuppressAmbientScope();
     }
 }

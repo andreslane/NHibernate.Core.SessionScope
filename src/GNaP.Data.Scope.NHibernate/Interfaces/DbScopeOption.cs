@@ -5,15 +5,16 @@
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
  */
+
 namespace GNaP.Data.Scope.NHibernate.Interfaces
 {
     /// <summary>
-    /// Indicates whether or not a new DbContextScope will join the ambient scope.
+    /// Indicates whether or not a new NHibernateScope will join the ambient scope.
     /// </summary>
-    public enum DbContextScopeOption
+    public enum DbScopeOption
     {
         /// <summary>
-        /// Join the ambient DbContextScope if one exists. Creates a new
+        /// Join the ambient NHibernateScope if one exists. Creates a new
         /// one otherwise.
         ///
         /// <para>
@@ -27,8 +28,8 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
         JoinExisting,
 
         /// <summary>
-        /// Ignore the ambient DbContextScope (if any) and force the creation of
-        /// a new DbContextScope.
+        /// Ignore the ambient NHibernateScope (if any) and force the creation of
+        /// a new NHibernateScope.
         ///
         /// This is an advanced feature that should be used with great care.
         ///

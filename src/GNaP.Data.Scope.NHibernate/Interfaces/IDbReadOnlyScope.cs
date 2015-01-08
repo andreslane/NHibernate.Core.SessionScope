@@ -12,15 +12,15 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
     using global::NHibernate;
 
     /// <summary>
-    /// A read-only DbContextScope. Refer to the comments for IDbContextScope
+    /// A read-only NHibernateScope. Refer to the comments for IDbScope
     /// for more details.
     /// </summary>
-    public interface IDbContextReadOnlyScope : IDisposable
+    public interface IDbReadOnlyScope : IDisposable
     {
         /// <summary>
-        /// Get a DbContext instance managed by this DbContextScope. Don't call SaveChanges() on the DbContext itself!
+        /// Get an ISession instance managed by this NHibernateScope. Don't call SaveChanges() on the ISession itself!
         /// Save the scope instead.
         /// </summary>
-        TDbContext Get<TDbContext>() where TDbContext : ISession;
+        ISession Get<TDbFactory>() where TDbFactory : IDbFactory<ISessionFactory>;
     }
 }

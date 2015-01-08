@@ -1,70 +1,75 @@
 ﻿namespace GNaP.Data.Scope.NHibernate.Demo.BusinessLogicServices
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using DomainModel;
-    using global::NHibernate;
+    using Interfaces;
+    using SessionFactories;
 
     public class UserCreditScoreService
-	{
-        private readonly IDbContextScopeFactory<ISession> _dbContextScopeFactory;
+    {
+        private readonly IDbScopeFactory _dbScopeFactory;
 
-        public UserCreditScoreService(IDbContextScopeFactory<ISession> dbContextScopeFactory)
-		{
-			if (dbContextScopeFactory == null) throw new ArgumentNullException("dbContextScopeFactory");
-			_dbContextScopeFactory = dbContextScopeFactory;
-		}
+        public UserCreditScoreService(IDbScopeFactory dbScopeFactory)
+        {
+            if (dbScopeFactory == null)
+                throw new ArgumentNullException("dbScopeFactory");
 
-		public void UpdateCreditScoreForAllUsers()
-		{
-			/*
-			 * Demo of DbContextScope + parallel programming.
-			 */
+            _dbScopeFactory = dbScopeFactory;
+        }
 
-			using (var dbContextScope = _dbContextScopeFactory.Create())
-			{
-				//-- Get all users
-				var dbContext = dbContextScope.GetFromFactory<UserSessionFactory>();
-				var userIds = dbContext.CreateCriteria<User>().List<User>().Select(u => u.Id).ToList();
+        public void UpdateCreditScoreForAllUsers()
+        {
+            /*
+             * Demo of DbScope + parallel programming.
+             */
 
-				Console.WriteLine("Found {0} users in the database. Will calculate and store their credit scores in parallel.", userIds.Count);
+            using (var dbScope = _dbScopeFactory.Create())
+            {
+                //-- Get all users
+                var session = dbScope.Get<UserSessionFactory>();
+                var userIds = session.CreateCriteria<User>().List<User>().Select(u => u.Id).ToList();
 
-				//-- Calculate and store the credit score of each user
-				// We're going to imagine that calculating a credit score of a user takes some time. 
-				// So we'll do it in parallel.
+                Console.WriteLine("Found {0} users in the database. Will calculate and store their credit scores in parallel.", userIds.Count);
 
-				// You MUST call SuppressAmbientContext() when kicking off a parallel execution flow 
-				// within a DbContextScope. Otherwise, this DbContextScope will remain the ambient scope
-				// in the parallel flows of execution, potentially leading to multiple threads
-				// accessing the same DbContext instance.
-				using (_dbContextScopeFactory.SuppressAmbientContext())
-				{
-					Parallel.ForEach(userIds, UpdateCreditScore);
-				}
+                //-- Calculate and store the credit score of each user
+                // We're going to imagine that calculating a credit score of a user takes some time.
+                // So we'll do it in parallel.
 
-				// Note: SaveChanges() isn't going to do anything in this instance since all the changes
-				// were actually made and saved in separate DbContextScopes created in separate threads.
-				dbContextScope.SaveChanges();
-			}
-		}
+                // You MUST call SuppressAmbientScope() when kicking off a parallel execution flow
+                // within a DbScope. Otherwise, this DbScope will remain the ambient scope
+                // in the parallel flows of execution, potentially leading to multiple threads
+                // accessing the same ISession instance.
+                using (_dbScopeFactory.SuppressAmbientScope())
+                {
+                    Parallel.ForEach(userIds, UpdateCreditScore);
+                }
 
-		public void UpdateCreditScore(Guid userId)
-		{
-			using (var dbContextScope = _dbContextScopeFactory.Create())
-			{
-				var dbContext = dbContextScope.GetFromFactory<UserSessionFactory>();
-				var user = dbContext.Get<User>(userId);
-				if (user == null)
-					throw new ArgumentException(String.Format("Invalid userId provided: {0}. Couldn't find a User with this ID.", userId));
+                // Note: SaveChanges() isn't going to do anything in this instance since all the changes
+                // were actually made and saved in separate DbScopes created in separate threads.
+                dbScope.SaveChanges();
+            }
+        }
 
-				// Simulate the calculation of a credit score taking some time
-				var random = new Random(Thread.CurrentThread.ManagedThreadId);
-				Thread.Sleep(random.Next(300, 1000));
+        public void UpdateCreditScore(Guid userId)
+        {
+            using (var dbScope = _dbScopeFactory.Create())
+            {
+                var session = dbScope.Get<UserSessionFactory>();
 
-				user.CreditScore = random.Next(1, 100);
-				dbContextScope.SaveChanges();
-			}
-		}
-	}
+                var user = session.Get<User>(userId);
+                if (user == null)
+                    throw new ArgumentException(String.Format("Invalid userId provided: {0}. Couldn't find a User with this ID.", userId));
+
+                // Simulate the calculation of a credit score taking some time
+                var random = new Random(Thread.CurrentThread.ManagedThreadId);
+                Thread.Sleep(random.Next(300, 1000));
+
+                user.CreditScore = random.Next(1, 100);
+                dbScope.SaveChanges();
+            }
+        }
+    }
 }

@@ -52,21 +52,20 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Implementation\AmbientContextSuppressor.cs" />
-    <Compile Include="Implementation\NHibernateAmbientContextLocator.cs" />
-    <Compile Include="Implementation\NHibernateContextCollection.cs" />
-    <Compile Include="Implementation\NHibernateContextReadOnlyScope.cs" />
-    <Compile Include="Implementation\NhibernateContextScope.cs" />
+    <Compile Include="Implementation\NHibernateAmbientLocator.cs" />
+    <Compile Include="Implementation\NHibernateSessionCollection.cs" />
+    <Compile Include="Implementation\NHibernateReadOnlyScope.cs" />
+    <Compile Include="Implementation\NHibernateScope.cs" />
     <Compile Include="Implementation\NHibernateScopeFactory.cs" />
-    <Compile Include="Interfaces\DbContextScopeOption.cs" />
-    <Compile Include="Interfaces\IAmbientDbContextLocator.cs" />
-    <Compile Include="Interfaces\IDbContextFactory.cs" />
-    <Compile Include="Interfaces\IDbContextReadOnlyScope.cs" />
-    <Compile Include="Interfaces\IDbContextScope.cs" />
-    <Compile Include="Interfaces\IDbContextScopeFactory.cs" />
+    <Compile Include="Interfaces\DbScopeOption.cs" />
+    <Compile Include="Interfaces\IAmbientDbLocator.cs" />
+    <Compile Include="Interfaces\IDbFactory.cs" />
+    <Compile Include="Interfaces\IDbReadOnlyScope.cs" />
+    <Compile Include="Interfaces\IDbScope.cs" />
+    <Compile Include="Interfaces\IDbScopeFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Interfaces\DbContextScope.Interfaces.licenseheader" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
