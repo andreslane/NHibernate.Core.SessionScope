@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    
+    <authors>infrabel</authors>
+    <owners>infrabel</owners>
+
+    <summary>A simple and flexible way to manage your NHibernate ISession instances</summary>
+    <description>$description$</description>
+    <copyright>MIT - Mehdi El Gueddari / BSD (3-Clause) - Infrabel</copyright>
+    
+    <projectUrl>https://github.com/infrabel/GNaP.Data.Scope.NHibernate</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/infrabel/GNaP.Data.Scope.NHibernate/master/src/icon.png</iconUrl>
+    <licenseUrl>https://github.com/infrabel/GNaP.Data.Scope.NHibernate/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    
+    <tags>gnap data nhibernate lifetime</tags>
+  </metadata>
+</package>

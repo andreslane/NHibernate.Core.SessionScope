@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
- 
+
 [assembly: ComVisible(false)]
 [assembly: AssemblyProduct("GNaP.Data.Scope.NHibernate")]
 [assembly: AssemblyDescription("A simple and flexible way to manage your NHibernate ISession instances.")]
-[assembly: AssemblyCopyright("Copyright (c) 2014 Infrabel")]
+[assembly: AssemblyCopyright("Copyright (c) 2015 Infrabel")]
 [assembly: AssemblyCompany("Infrabel")]
 [assembly: AssemblyConfiguration("Release")]
 
