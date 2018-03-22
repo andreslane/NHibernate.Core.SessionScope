@@ -183,3 +183,4 @@ UpgradeLog*.htm
 FakesAssemblies/
 /.vs
 /src/.vs/GNaP.Data.Scope.NHibernate/v15/Server/sqlite3
+/src/.nuget

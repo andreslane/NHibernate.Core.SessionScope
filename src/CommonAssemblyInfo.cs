@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("NHibernate.SessionScope")]
 [assembly: AssemblyDescription("A simple and flexible way to manage your NHibernate ISession instances.")]
 [assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyCompany("Walter Casella")]
+[assembly: AssemblyCopyright("Copyright © 2018")]
 
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
