@@ -1,29 +1,36 @@
-namespace GNaP.Data.Scope.NHibernate.Demo.SessionFactories
+using NHibernate.Cfg;
+using NHibernate.Context;
+using NHibernate.Dialect;
+using NHibernate.Mapping.ByCode;
+using NHibernate.SessionScope.Demo.Mapping;
+using NHibernate.Tool.hbm2ddl;
+
+namespace NHibernate.SessionScope.Demo.SessionFactories
 {
-    using FluentNHibernate.Cfg;
-    using FluentNHibernate.Cfg.Db;
-    using global::NHibernate;
-    using global::NHibernate.Context;
-    using global::NHibernate.Tool.hbm2ddl;
-    using Interfaces;
-
-    public class UserSessionFactory : IDbFactory<ISessionFactory>
+    public static class UserSessionFactory
     {
-        private static ISessionFactory _sessionFactory;
-
-        public ISessionFactory Create()
+        public static ISessionFactory CreateSessionFactory()
         {
-            return _sessionFactory ?? (_sessionFactory = CreateSessionFactory());
-        }
+            var configuration = new Configuration();
 
-        private static ISessionFactory CreateSessionFactory()
-        {
-            return Fluently.Configure()
-                           .Database(MsSqlConfiguration.MsSql2008.ConnectionString(@"Data Source=(LocalDB)\v11.0;AttachDbFilename=|DataDirectory|\nh.mdf;Integrated Security=True"))
-                           .Mappings(m => m.FluentMappings.AddFromAssemblyOf<Program>())
-                           .ExposeConfiguration(cfg => new SchemaExport(cfg).Create(true, true)) // TODO: Doesnt this always recreate the database?
-                           .CurrentSessionContext<CallSessionContext>()
-                           .BuildSessionFactory();
+            configuration
+                .DataBaseIntegration(db =>
+                {
+                    db.ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\nh.mdf;Integrated Security=True";
+                    db.Dialect<MsSql2012Dialect>();
+                })
+                .AddAssembly(typeof(Program).Assembly)
+                .CurrentSessionContext<CallSessionContext>();
+
+            var mapper = new ModelMapper();
+            mapper.AddMappings(typeof(UserMapping).Assembly.GetTypes());
+
+            configuration.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
+
+            SchemaMetadataUpdater.QuoteTableAndColumns(configuration);
+            new SchemaExport(configuration).Create(true, true);
+
+            return configuration.BuildSessionFactory();
         }
     }
 }

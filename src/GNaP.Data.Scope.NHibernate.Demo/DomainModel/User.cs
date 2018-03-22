@@ -1,7 +1,7 @@
-﻿namespace GNaP.Data.Scope.NHibernate.Demo.DomainModel
-{
-    using System;
+﻿using System;
 
+namespace NHibernate.SessionScope.Demo.DomainModel
+{
     // Anemic model to keep this demo application simple.
     public  class User
     {

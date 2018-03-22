@@ -7,8 +7,8 @@
     <ProjectGuid>{BCD94CFB-8286-4BD1-8D88-C34C0C48C9EC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GNaP.Data.Scope.NHibernate</RootNamespace>
-    <AssemblyName>GNaP.Data.Scope.NHibernate</AssemblyName>
+    <RootNamespace>NHibernate.SessionScope</RootNamespace>
+    <AssemblyName>NHibernate.SessionScope</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>gnap.ico</ApplicationIcon>
@@ -52,18 +54,16 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Implementation\AmbientContextSuppressor.cs" />
-    <Compile Include="Implementation\NHibernateAmbientLocator.cs" />
-    <Compile Include="Implementation\NHibernateSessionCollection.cs" />
-    <Compile Include="Implementation\NHibernateReadOnlyScope.cs" />
-    <Compile Include="Implementation\NHibernateScope.cs" />
-    <Compile Include="Implementation\NHibernateScopeFactory.cs" />
-    <Compile Include="Interfaces\DbScopeOption.cs" />
-    <Compile Include="Interfaces\IAmbientDbLocator.cs" />
-    <Compile Include="Interfaces\IDbFactory.cs" />
-    <Compile Include="Interfaces\IDbReadOnlyScope.cs" />
-    <Compile Include="Interfaces\IDbScope.cs" />
-    <Compile Include="Interfaces\IDbScopeFactory.cs" />
+    <Compile Include="Implementation\AmbientSessionLocator.cs" />
+    <Compile Include="Implementation\SessionReadOnlyScope.cs" />
+    <Compile Include="Implementation\SessionScope.cs" />
+    <Compile Include="Implementation\SessionScopeFactory.cs" />
+    <Compile Include="Interfaces\IAmbientSessionLocator.cs" />
+    <Compile Include="Interfaces\ISessionReadOnlyScope.cs" />
+    <Compile Include="Interfaces\ISessionScope.cs" />
+    <Compile Include="Interfaces\ISessionScopeFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Implementation\SessionScopeOption.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

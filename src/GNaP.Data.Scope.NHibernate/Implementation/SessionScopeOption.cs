@@ -6,15 +6,15 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace GNaP.Data.Scope.NHibernate.Interfaces
+namespace NHibernate.SessionScope
 {
     /// <summary>
-    /// Indicates whether or not a new NHibernateScope will join the ambient scope.
+    /// Indicates whether or not a new SessionScopeOption will join the ambient scope.
     /// </summary>
-    public enum DbScopeOption
+    public enum SessionScopeOption
     {
         /// <summary>
-        /// Join the ambient NHibernateScope if one exists. Creates a new
+        /// Join the ambient SessionScopeOption if one exists. Creates a new
         /// one otherwise.
         ///
         /// <para>
@@ -28,8 +28,8 @@ namespace GNaP.Data.Scope.NHibernate.Interfaces
         JoinExisting,
 
         /// <summary>
-        /// Ignore the ambient NHibernateScope (if any) and force the creation of
-        /// a new NHibernateScope.
+        /// Ignore the ambient SessionScopeOption (if any) and force the creation of
+        /// a new SessionScopeOption.
         ///
         /// This is an advanced feature that should be used with great care.
         ///

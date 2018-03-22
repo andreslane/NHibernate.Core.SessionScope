@@ -1,7 +1,7 @@
-﻿namespace GNaP.Data.Scope.NHibernate.Demo.CommandModel
-{
-    using System;
+﻿using System;
 
+namespace NHibernate.SessionScope.Demo.CommandModel
+{
     /// <summary>
     /// Specifications of the CreateUser command. Defines the properties of a new user.
     /// </summary>

@@ -8,5 +8,5 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("GNaP.Data.Scope.NHibernate.Implementation")]
+[assembly: AssemblyTitle("NHibernate.SessionScope")]
 [assembly: Guid("ec85d5fd-c598-44a6-a874-ce028808acc0")]

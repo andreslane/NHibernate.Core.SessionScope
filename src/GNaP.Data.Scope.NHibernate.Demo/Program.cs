@@ -1,49 +1,51 @@
-﻿namespace GNaP.Data.Scope.NHibernate.Demo
-{
-    using System;
-    using System.Linq;
-    using BusinessLogicServices;
-    using CommandModel;
-    using DomainModel;
-    using Repositories;
-    using SessionFactories;
-    using Implementation;
-    using Interfaces;
+﻿using System;
+using System.Linq;
+using NHibernate.SessionScope.Demo.BusinessLogicServices;
+using NHibernate.SessionScope.Demo.CommandModel;
+using NHibernate.SessionScope.Demo.Repositories;
+using NHibernate.SessionScope.Demo.SessionFactories;
+using NHibernate.SessionScope.Interfaces;
 
+namespace NHibernate.SessionScope.Demo
+{
     internal class Program
     {
         private static void Main(string[] args)
         {
             //-- Poor-man DI - build our dependencies by hand for this demo
-            IDbScopeFactory nHibernateScopeFactory = new NHibernateScopeFactory();
-            IAmbientDbLocator ambientLocator = new NHibernateAmbientLocator();
-            IUserRepository userRepository = new UserRepository(ambientLocator);
+            ISessionFactory sessionFactory = UserSessionFactory.CreateSessionFactory();
+            ISessionScopeFactory sessionScopeFactory = new SessionScopeFactory(sessionFactory);
+            IAmbientSessionLocator ambientSessionLocator = new AmbientSessionLocator();
+            IUserRepository userRepository = new UserRepository(ambientSessionLocator);
 
-            var userCreationService = new UserCreationService(nHibernateScopeFactory, userRepository);
-            var userQueryService = new UserQueryService(nHibernateScopeFactory, userRepository);
-            var userEmailService = new UserEmailService(nHibernateScopeFactory);
-            var userCreditScoreService = new UserCreditScoreService(nHibernateScopeFactory);
+            var userCreationService = new UserCreationService(sessionScopeFactory, userRepository);
+            var userQueryService = new UserQueryService(sessionScopeFactory, userRepository);
+            var userCreditScoreService = new UserCreditScoreService(sessionScopeFactory);
 
             try
             {
-                Console.WriteLine("This demo application will create a database named DbContextScopeDemo in the default SQL Server instance on localhost. Edit the connection string in UserManagementDbContext if you'd like to create it somewhere else.");
+                Console.WriteLine("This demo application will create a database named NH in the LocalDB SQL Server instance on localhost. Edit the connection string in UserSessionFactory if you'd like to create it somewhere else.");
                 Console.WriteLine("Press enter to start...");
                 Console.ReadLine();
 
                 //-- Demo of typical usage for read and writes
                 Console.WriteLine("Creating a user called Mary...");
-                var marysSpec = new UserCreationSpec("Mary", "mary@example.com");
-                userCreationService.CreateUser(marysSpec);
+                var marySpec = new UserCreationSpec("Mary", "mary@example.com");
+                userCreationService.CreateUser(marySpec);
                 Console.WriteLine("Done.\n");
 
                 Console.WriteLine("Trying to retrieve our newly created user from the data store...");
-                var mary = userQueryService.GetUser(marysSpec.Id);
+                var mary = userQueryService.GetUser(marySpec.Id);
                 Console.WriteLine("OK. Persisted user: {0}", mary);
+
+                Console.WriteLine("Trying to retrieve our newly created user from the data store via a repository...");
+                var maryViaRepo = userQueryService.GetUserViaRepository(marySpec.Id);
+                Console.WriteLine("OK. Persisted user: {0}", maryViaRepo);
 
                 Console.WriteLine("Press enter to continue...");
                 Console.ReadLine();
 
-                //-- Demo of nested DbScopes
+                //-- Demo of nested SessionScopes
                 Console.WriteLine("Creating 2 new users called John and Jeanne in an atomic transaction...");
                 var johnSpec = new UserCreationSpec("John", "john@example.com");
                 var jeanneSpec = new UserCreationSpec("Jeanne", "jeanne@example.com");
@@ -57,7 +59,7 @@
                 Console.WriteLine("Press enter to continue...");
                 Console.ReadLine();
 
-                //-- Demo of nested DbScopes in the face of an exception.
+                //-- Demo of nested SessionScopes in the face of an exception.
                 // If any of the provided users failed to get persisted, none should get persisted.
                 Console.WriteLine("Creating 2 new users called Julie and Marc in an atomic transaction. Will make the persistence of the second user fail intentionally in order to test the atomicity of the transaction...");
                 var julieSpec = new UserCreationSpec("Julie", "julie@example.com");
@@ -80,17 +82,7 @@
                 Console.WriteLine("Press enter to continue...");
                 Console.ReadLine();
 
-                //-- Demo of DbScope within an async flow
-                Console.WriteLine("NHIBERNATE DOES NOT SUPPORT ASYNC... ___SKIPPING___ Trying to retrieve two users John and Jeanne sequentially in an asynchronous manner...");
-                // We're going to block on the async task here as we don't have a choice. No risk of deadlocking in any case as console apps
-                // don't have a synchronization context.
-                //var usersFoundAsync = userQueryService.GetTwoUsersAsync(johnSpec.Id, jeanneSpec.Id).Result;
-                //Console.WriteLine("OK. Found {0} persisted users.", usersFoundAsync.Count());
-
-                //Console.WriteLine("Press enter to continue...");
-                //Console.ReadLine();
-
-                //-- Demo of explicit database transaction.
+                //-- Demo of explicit database transaction isolation level.
                 Console.WriteLine("Trying to retrieve user John within a READ UNCOMMITTED database transaction...");
                 // You'll want to use SQL Profiler or Entity Framework Profiler to verify that the correct transaction isolation
                 // level is being used.
@@ -100,34 +92,7 @@
                 Console.WriteLine("Press enter to continue...");
                 Console.ReadLine();
 
-                //-- Demo of disabling the DbScope nesting behaviour in order to force the persistence of changes made to entities
-                // This is a pretty advanced feature that you can safely ignore until you actually need it.
-                Console.WriteLine("Will simulate sending a Welcome email to John...");
-
-                using (var parentScope = nHibernateScopeFactory.Create())
-                {
-                    var parentSession = parentScope.Get<UserSessionFactory>();
-
-                    // Load John in the parent ISession
-                    var john = parentSession.Get<User>(johnSpec.Id);
-                    Console.WriteLine("Before calling SendWelcomeEmail(), john.WelcomeEmailSent = " + john.WelcomeEmailSent);
-
-                    // Now call our SendWelcomeEmail() business logic service method, which will
-                    // update John in a non-nested child session
-                    userEmailService.SendWelcomeEmail(johnSpec.Id);
-
-                    // Verify that we can see the modifications made to John by the SendWelcomeEmail() method
-                    Console.WriteLine("After calling SendWelcomeEmail(), john.WelcomeEmailSent = " + john.WelcomeEmailSent);
-
-                    // Note that even though we're not calling SaveChanges() in the parent scope here, the changes
-                    // made to John by SendWelcomeEmail() will remain persisted in the database as SendWelcomeEmail()
-                    // forced the creation of a new DbScope.
-                }
-
-                Console.WriteLine("Press enter to continue...");
-                Console.ReadLine();
-
-                //-- Demonstration of DbScope and parallel programming
+                //-- Demonstration of SessionScope and parallel programming
                 Console.WriteLine("Calculating and storing the credit score of all users in the database in parallel...");
                 userCreditScoreService.UpdateCreditScoreForAllUsers();
                 Console.WriteLine("Done.");

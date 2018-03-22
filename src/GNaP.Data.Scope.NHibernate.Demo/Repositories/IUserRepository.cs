@@ -1,8 +1,8 @@
-﻿namespace GNaP.Data.Scope.NHibernate.Demo.Repositories
-{
-    using System;
-    using DomainModel;
+﻿using System;
+using NHibernate.SessionScope.Demo.DomainModel;
 
+namespace NHibernate.SessionScope.Demo.Repositories
+{
     public interface IUserRepository
     {
         User Get(Guid userId);

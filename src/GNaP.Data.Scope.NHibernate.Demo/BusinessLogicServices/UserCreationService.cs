@@ -1,46 +1,40 @@
-﻿namespace GNaP.Data.Scope.NHibernate.Demo.BusinessLogicServices
-{
-    using System;
-    using CommandModel;
-    using DomainModel;
-    using Interfaces;
-    using Repositories;
+﻿using System;
+using NHibernate.SessionScope.Demo.CommandModel;
+using NHibernate.SessionScope.Demo.DomainModel;
+using NHibernate.SessionScope.Demo.Repositories;
+using NHibernate.SessionScope.Interfaces;
 
+namespace NHibernate.SessionScope.Demo.BusinessLogicServices
+{
     /*
      * Example business logic service implementing command functionalities (i.e. create / update actions).
      */
     public class UserCreationService
     {
-        private readonly IDbScopeFactory _dbScopeFactory;
+        private readonly ISessionScopeFactory _sessionScopeFactory;
         private readonly IUserRepository _userRepository;
 
-        public UserCreationService(IDbScopeFactory dbScopeFactory, IUserRepository userRepository)
+        public UserCreationService(ISessionScopeFactory sessionScopeFactory, IUserRepository userRepository)
         {
-            if (dbScopeFactory == null)
-                throw new ArgumentNullException("dbScopeFactory");
-
-            if (userRepository == null)
-                throw new ArgumentNullException("userRepository");
-
-            _dbScopeFactory = dbScopeFactory;
-            _userRepository = userRepository;
+            _sessionScopeFactory = sessionScopeFactory ?? throw new ArgumentNullException(nameof(sessionScopeFactory));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         public void CreateUser(UserCreationSpec userToCreate)
         {
             if (userToCreate == null)
-                throw new ArgumentNullException("userToCreate");
+                throw new ArgumentNullException(nameof(userToCreate));
 
             userToCreate.Validate();
 
             /*
-             * Typical usage of DbScope for a read-write business transaction.
+             * Typical usage of SessionScope for a read-write business transaction.
              * It's as simple as it looks.
              */
-            using (var dbScope = _dbScopeFactory.Create())
+            using (var sessionScope = _sessionScopeFactory.Create())
             {
                 //-- Build domain model
-                var user = new User
+                var user = new User()
                            {
                                Id = userToCreate.Id,
                                Name = userToCreate.Name,
@@ -51,14 +45,14 @@
 
                 //-- Persist
                 _userRepository.Add(user);
-                dbScope.SaveChanges();
+                sessionScope.SaveChanges();
             }
         }
 
         public void CreateListOfUsers(params UserCreationSpec[] usersToCreate)
         {
             /*
-             * Example of DbScope nesting in action.
+             * Example of SessionScope nesting in action.
              *
              * We already have a service method - CreateUser() - that knows how to create a new user
              * and implements all the business rules around the creation of a new user
@@ -74,15 +68,15 @@
              * or none of them will. It would be disastrous to have a partial failure here
              * and end up with some users but not all having been created.
              *
-             * DbScope makes this trivial to implement.
+             * SessionScope makes this trivial to implement.
              *
-             * The inner DbScope instance that the CreateUser() method creates
+             * The inner SessionScope instance that the CreateUser() method creates
              * will join our top-level scope. This ensures that the same ISession instance is
              * going to be used throughout this business transaction.
              *
              */
 
-            using (var dbScope = _dbScopeFactory.Create())
+            using (var sessionScope = _sessionScopeFactory.Create())
             {
                 foreach (var toCreate in usersToCreate)
                 {
@@ -90,20 +84,20 @@
                 }
 
                 // All the changes will get persisted here
-                dbScope.SaveChanges();
+                sessionScope.SaveChanges();
             }
         }
 
         public void CreateListOfUsersWithIntentionalFailure(params UserCreationSpec[] usersToCreate)
         {
             /*
-             * Here, we'll verify that inner DbScopes really join the parent scope and
+             * Here, we'll verify that inner SessionScopes really join the parent scope and
              * don't persist their changes until the parent scope completes successfully.
              */
 
             var firstUser = true;
 
-            using (var dbScope = _dbScopeFactory.Create())
+            using (var sessionScope = _sessionScopeFactory.Create())
             {
                 foreach (var toCreate in usersToCreate)
                 {
@@ -123,7 +117,7 @@
                     }
                 }
 
-                dbScope.SaveChanges();
+                sessionScope.SaveChanges();
             }
         }
     }

@@ -7,8 +7,8 @@
     <ProjectGuid>{977FC0C6-4FDF-4DD9-AAC0-456D4D79C96C}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GNaP.Data.Scope.NHibernate.Demo</RootNamespace>
-    <AssemblyName>GNaP.Data.Scope.NHibernate.Demo</AssemblyName>
+    <RootNamespace>NHibernate.SessionScope.Demo</RootNamespace>
+    <AssemblyName>NHibernate.SessionScope.Demo</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -38,6 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -47,14 +48,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>gnap.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentNHibernate">
-      <HintPath>..\packages\FluentNHibernate.2.0.1.0\lib\net40\FluentNHibernate.dll</HintPath>
-    </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
     </Reference>
@@ -73,7 +72,6 @@
     </Compile>
     <Compile Include="BusinessLogicServices\UserCreationService.cs" />
     <Compile Include="BusinessLogicServices\UserCreditScoreService.cs" />
-    <Compile Include="BusinessLogicServices\UserEmailService.cs" />
     <Compile Include="CommandModel\UserCreationSpec.cs" />
     <Compile Include="DomainModel\User.cs" />
     <Compile Include="Mapping\UserMapping.cs" />

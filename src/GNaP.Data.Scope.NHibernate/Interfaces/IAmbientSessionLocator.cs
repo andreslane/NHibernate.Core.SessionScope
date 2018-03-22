@@ -6,21 +6,19 @@
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace GNaP.Data.Scope.NHibernate.Interfaces
+namespace NHibernate.SessionScope.Interfaces
 {
-    using global::NHibernate;
-
     /// <summary>
     /// Convenience methods to retrieve ambient ISession instances.
     /// </summary>
-    public interface IAmbientDbLocator
+    public interface IAmbientSessionLocator
     {
         /// <summary>
-        /// If called within the scope of a NHibernateScope, gets or creates
-        /// the ambient ISession instance for the provided SessionFactory type.
+        /// If called within the scope of a SessionScope, gets or creates
+        /// the ambient ISession instance.
         ///
         /// Otherwise returns null.
         /// </summary>
-        ISession Get<TDbFactory>() where TDbFactory : IDbFactory<ISessionFactory>;
+        ISession Get();
     }
 }
