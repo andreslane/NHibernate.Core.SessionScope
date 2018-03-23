@@ -18,6 +18,7 @@ namespace NHibernate.SessionScope.Demo.SessionFactories
                 {
                     db.ConnectionString = @"Data Source=(localdb)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\nh.mdf;Integrated Security=True";
                     db.Dialect<MsSql2012Dialect>();
+                    db.KeywordsAutoImport = Hbm2DDLKeyWords.AutoQuote;
                 })
                 .AddAssembly(typeof(Program).Assembly)
                 .CurrentSessionContext<CallSessionContext>();
@@ -27,7 +28,6 @@ namespace NHibernate.SessionScope.Demo.SessionFactories
 
             configuration.AddMapping(mapper.CompileMappingForAllExplicitlyAddedEntities());
 
-            SchemaMetadataUpdater.QuoteTableAndColumns(configuration);
             new SchemaExport(configuration).Create(true, true);
 
             return configuration.BuildSessionFactory();
