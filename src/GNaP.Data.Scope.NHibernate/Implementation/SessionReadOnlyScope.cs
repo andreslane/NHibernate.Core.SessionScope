@@ -28,8 +28,13 @@ namespace NHibernate.SessionScope
         }
 
         public SessionReadOnlyScope(SessionScopeOption joiningOption, IsolationLevel? isolationLevel, ISessionFactory sessionFactory)
+            : this(joiningOption, isolationLevel, sessionFactory, null)
         {
-            _internalScope = new SessionScope(joiningOption, true, isolationLevel, sessionFactory);
+        }
+
+        public SessionReadOnlyScope(SessionScopeOption joiningOption, IsolationLevel? isolationLevel, ISessionFactory sessionFactory, IInterceptor sessionLocalInterceptor)
+        {
+            _internalScope = new SessionScope(joiningOption, true, isolationLevel, sessionFactory, sessionLocalInterceptor);
         }
 
         public void Dispose()

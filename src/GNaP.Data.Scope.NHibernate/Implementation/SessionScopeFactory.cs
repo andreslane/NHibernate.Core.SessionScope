@@ -13,24 +13,24 @@ namespace NHibernate.SessionScope
             _sessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
         }
 
-        public ISessionScope Create(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting)
+        public ISessionScope Create(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting, IInterceptor sessionLocalInterceptor = null)
         {
-            return new SessionScope(joiningOption, false, null, _sessionFactory);
+            return new SessionScope(joiningOption, false, null, _sessionFactory, sessionLocalInterceptor);
         }
 
-        public ISessionReadOnlyScope CreateReadOnly(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting)
+        public ISessionReadOnlyScope CreateReadOnly(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting, IInterceptor sessionLocalInterceptor = null)
         {
-            return new SessionReadOnlyScope(joiningOption, null, _sessionFactory);
+            return new SessionReadOnlyScope(joiningOption, null, _sessionFactory, sessionLocalInterceptor);
         }
 
-        public ISessionReadOnlyScope CreateReadOnlyWithIsolationLevel(IsolationLevel isolationLevel)
+        public ISessionReadOnlyScope CreateReadOnlyWithIsolationLevel(IsolationLevel isolationLevel, IInterceptor sessionLocalInterceptor = null)
         {
-            return new SessionReadOnlyScope(SessionScopeOption.ForceCreateNew, isolationLevel, _sessionFactory);
+            return new SessionReadOnlyScope(SessionScopeOption.ForceCreateNew, isolationLevel, _sessionFactory, sessionLocalInterceptor);
         }
 
-        public ISessionScope CreateWithIsolationLevel(IsolationLevel isolationLevel)
+        public ISessionScope CreateWithIsolationLevel(IsolationLevel isolationLevel, IInterceptor sessionLocalInterceptor = null)
         {
-            return new SessionScope(SessionScopeOption.ForceCreateNew, false, isolationLevel, _sessionFactory);
+            return new SessionScope(SessionScopeOption.ForceCreateNew, false, isolationLevel, _sessionFactory, sessionLocalInterceptor);
         }
 
         public IDisposable SuppressAmbientScope()

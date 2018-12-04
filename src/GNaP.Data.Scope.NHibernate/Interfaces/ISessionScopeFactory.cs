@@ -29,7 +29,7 @@ namespace NHibernate.SessionScope.Interfaces
         /// is an advanced feature that should be used with great care and only if you fully understand the
         /// implications of doing this.
         /// </summary>
-        ISessionScope Create(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting);
+        ISessionScope Create(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting, IInterceptor sessionLocalInterceptor = null);
 
         /// <summary>
         /// Creates a new SessionScope for read-only queries.
@@ -43,7 +43,7 @@ namespace NHibernate.SessionScope.Interfaces
         /// is an advanced feature that should be used with great care and only if you fully understand the
         /// implications of doing this.
         /// </summary>
-        ISessionReadOnlyScope CreateReadOnly(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting);
+        ISessionReadOnlyScope CreateReadOnly(SessionScopeOption joiningOption = SessionScopeOption.JoinExisting, IInterceptor sessionLocalInterceptor = null);
 
         /// <summary>
         /// Forces the creation of a new ambient SessionScope (i.e. does not
@@ -54,7 +54,7 @@ namespace NHibernate.SessionScope.Interfaces
         /// This is an advanced feature that you should use very carefully
         /// and only if you fully understand the implications of doing this.
         /// </summary>
-        ISessionScope CreateWithIsolationLevel(IsolationLevel isolationLevel);
+        ISessionScope CreateWithIsolationLevel(IsolationLevel isolationLevel, IInterceptor sessionLocalInterceptor = null);
 
         /// <summary>
         /// Forces the creation of a new ambient read-only SessionScope (i.e. does not
@@ -65,7 +65,7 @@ namespace NHibernate.SessionScope.Interfaces
         /// This is an advanced feature that you should use very carefully
         /// and only if you fully understand the implications of doing this.
         /// </summary>
-        ISessionReadOnlyScope CreateReadOnlyWithIsolationLevel(IsolationLevel isolationLevel);
+        ISessionReadOnlyScope CreateReadOnlyWithIsolationLevel(IsolationLevel isolationLevel, IInterceptor sessionLocalInterceptor = null);
 
         /// <summary>
         /// Temporarily suppresses the ambient SessionScope. 

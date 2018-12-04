@@ -26,6 +26,12 @@ namespace NHibernate.SessionScope
         }
 
         public SessionScope(SessionScopeOption joiningOption, bool readOnly, IsolationLevel? isolationLevel, ISessionFactory sessionFactory)
+            : this(joiningOption, readOnly, isolationLevel, sessionFactory, null)
+        {
+
+        }
+
+        public SessionScope(SessionScopeOption joiningOption, bool readOnly, IsolationLevel? isolationLevel, ISessionFactory sessionFactory, IInterceptor sessionLocalInterceptor)
         {
             if (isolationLevel.HasValue && joiningOption == SessionScopeOption.JoinExisting)
                 throw new ArgumentException("Cannot join an ambient SessionScope when an explicit database transaction is required. When requiring explicit database transactions to be used (i.e. when the 'isolationLevel' parameter is set), you must not also ask to join the ambient context (i.e. the 'joinAmbient' parameter must be set to false).");
@@ -52,7 +58,18 @@ namespace NHibernate.SessionScope
             {
                 _nested = false;
                 _session = new Lazy<ISession>(() => {
-                    ISession session = sessionFactory.OpenSession();
+                    ISession session;
+
+                    if (sessionLocalInterceptor == null)
+                    {
+                        session = sessionFactory.OpenSession();
+                    }
+                    else
+                    {
+                        session = sessionFactory.WithOptions()
+                            .Interceptor(sessionLocalInterceptor)
+                            .OpenSession();
+                    }                    
 
                     if (readOnly)
                     {

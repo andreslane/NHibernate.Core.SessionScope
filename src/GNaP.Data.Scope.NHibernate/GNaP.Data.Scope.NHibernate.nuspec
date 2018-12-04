@@ -11,7 +11,7 @@
     <iconUrl>https://github.com/wocasella/NHibernate.SessionScope/blob/master/src/icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Upgraded version to work with NHibernate 5.1.0.</releaseNotes>
+    <releaseNotes>Added IInterceptor as an optional param to the ISessionScopeFactory API.</releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>dbcontext session nhibernate lifetime scope</tags>
     <summary>SessionScope was created out of the need for a better way to manage ISession instances in NHibernate-based applications.</summary>
