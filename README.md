@@ -1,5 +1,17 @@
-GNaP.Data.Scope.NHibernate
+NHibernate.Core.SessionScope
 ==========================
+Install using the [NHibernate.Core.SessionScope](https://www.nuget.org/packages/NHibernate.Core.SessionScope/) NuGet package:
+
+```language-csharp
+Install-Package NHibernate.Core.SessionScope -Version 3.0.1
+```
+
+## Credits
+* [wocasella](https://github.com/wocasella/NHibernate.SessionScope)
+* [infrabel](https://github.com/infrabel/GNaP.Data.Scope.NHibernate)
+
+
+# The important stuff
 
 A simple and flexible way to manage your NHibernate ISession instances.
 
@@ -257,10 +269,6 @@ public void RandomServiceMethod(Guid accountId)
   }
 }
 ```
-
-## NuGet
-
-[GNaP.Data.Scope.NHibernate](http://www.nuget.org/packages/GNaP.Data.Scope.NHibernate/)
 
 ## Copyright
 

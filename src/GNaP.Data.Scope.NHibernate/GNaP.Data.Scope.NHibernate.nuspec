@@ -6,13 +6,12 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://github.com/wocasella/NHibernate.SessionScope/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/wocasella/NHibernate.SessionScope</projectUrl>
-    <iconUrl>https://github.com/wocasella/NHibernate.SessionScope/blob/master/src/icon.png</iconUrl>
+    <licenseUrl>https://github.com/andreslane/NHibernate.Core.SessionScope/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/andreslane/NHibernate.Core.SessionScope</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
     <releaseNotes>Added IInterceptor as an optional param to the ISessionScopeFactory API.</releaseNotes>
-    <copyright>Copyright 2018</copyright>
+    <packageDescription>A simple and flexible way to manage your NHibernate ISession instances.</packageDescription>
+    <copyright>Copyright 2020</copyright>
     <tags>dbcontext session nhibernate lifetime scope</tags>
     <summary>SessionScope was created out of the need for a better way to manage ISession instances in NHibernate-based applications.</summary>
   </metadata>
