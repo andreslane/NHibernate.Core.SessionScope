@@ -13,7 +13,7 @@ Install-Package NHibernate.Core.SessionScope -Version 3.0.1
 
 # The important stuff
 
-A simple and flexible way to manage your NHibernate ISession instances.
+A simple and flexible way to manage your NHibernate ISession instances **_supported for netstandard target framework_**.
 
 `DbScope` was created out of the need for a better way to manage ISession instances in NHibernate-based applications.
 
