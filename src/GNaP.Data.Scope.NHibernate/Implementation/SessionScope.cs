@@ -1,8 +1,9 @@
+using NHibernate.SessionScope.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Data;
 using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Messaging;
-using NHibernate.SessionScope.Interfaces;
+using System.Threading;
 
 namespace NHibernate.SessionScope
 {
@@ -69,7 +70,7 @@ namespace NHibernate.SessionScope
                         session = sessionFactory.WithOptions()
                             .Interceptor(sessionLocalInterceptor)
                             .OpenSession();
-                    }                    
+                    }
 
                     if (readOnly)
                     {
@@ -357,13 +358,13 @@ Stack Trace:
             if (newAmbientScope == null)
                 throw new ArgumentNullException(nameof(newAmbientScope));
 
-            var current = CallContext.LogicalGetData(AmbientDbContextScopeKey) as InstanceIdentifier;
+            var current = CallContext.GetData(AmbientDbContextScopeKey) as InstanceIdentifier;
 
             if (current == newAmbientScope._instanceIdentifier)
                 return;
 
             // Store the new scope's instance identifier in the CallContext, making it the ambient scope
-            CallContext.LogicalSetData(AmbientDbContextScopeKey, newAmbientScope._instanceIdentifier);
+            CallContext.SetData(AmbientDbContextScopeKey, newAmbientScope._instanceIdentifier);
 
             // Keep track of this instance (or do nothing if we're already tracking it)
             SessionScopeInstances.GetValue(newAmbientScope._instanceIdentifier, key => newAmbientScope);
@@ -376,12 +377,12 @@ Stack Trace:
         internal static void RemoveAmbientScope()
         {
             // If there was an ambient scope, we can stop tracking it now
-            if (CallContext.LogicalGetData(AmbientDbContextScopeKey) is InstanceIdentifier current)
+            if (CallContext.GetData(AmbientDbContextScopeKey) is InstanceIdentifier current)
             {
                 SessionScopeInstances.Remove(current);
             }
 
-            CallContext.LogicalSetData(AmbientDbContextScopeKey, null);
+            CallContext.SetData(AmbientDbContextScopeKey, null);
         }
 
         /// <summary>
@@ -390,7 +391,7 @@ Stack Trace:
         /// </summary>
         internal static void HideAmbientScope()
         {
-            CallContext.LogicalSetData(AmbientDbContextScopeKey, null);
+            CallContext.SetData(AmbientDbContextScopeKey, null);
         }
 
         /// <summary>
@@ -399,7 +400,7 @@ Stack Trace:
         internal static SessionScope GetAmbientScope()
         {
             // Retrieve the identifier of the ambient scope (if any)
-            var instanceIdentifier = CallContext.LogicalGetData(AmbientDbContextScopeKey) as InstanceIdentifier;
+            var instanceIdentifier = CallContext.GetData(AmbientDbContextScopeKey) as InstanceIdentifier;
 
             if (instanceIdentifier == null)
                 return null; // Either no ambient context has been set or we've crossed an app domain boundary and have (intentionally) lost the ambient context
@@ -440,4 +441,30 @@ Stack Trace:
     internal class InstanceIdentifier : MarshalByRefObject
     {
     }
+
+    /// <summary>
+    /// Provides a way to set contextual data that flows with the call and 
+    /// async context of a test or invocation.
+    /// </summary>
+    internal static class CallContext
+    {
+        static ConcurrentDictionary<string, AsyncLocal<object>> state = new ConcurrentDictionary<string, AsyncLocal<object>>();
+
+        /// <summary>
+        /// Stores a given object and associates it with the specified name.
+        /// </summary>
+        /// <param name="name">The name with which to associate the new item in the call context.</param>
+        /// <param name="data">The object to store in the call context.</param>
+        public static void SetData(string name, object data) =>
+            state.GetOrAdd(name, _ => new AsyncLocal<object>()).Value = data;
+
+        /// <summary>
+        /// Retrieves an object with the specified name from the <see cref="CallContext"/>.
+        /// </summary>
+        /// <param name="name">The name of the item in the call context.</param>
+        /// <returns>The object in the call context associated with the specified name, or <see langword="null"/> if not found.</returns>
+        public static object GetData(string name) =>
+            state.TryGetValue(name, out AsyncLocal<object> data) ? data.Value : null;
+    }
+
 }
